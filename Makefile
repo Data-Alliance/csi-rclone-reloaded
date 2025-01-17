@@ -14,7 +14,8 @@
 
 VERSION=$(shell cat VERSION)
 #REGISTRY_NAME=dvcrn
-REGISTRY_NAME=sbison
+#REGISTRY_NAME=sbison
+REGISTRY_NAME=ghcr.io/data-alliance
 IMAGE_NAME=csi-rclone-reloaded
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
 

@@ -103,11 +103,14 @@ func extractFlags(volumeContext map[string]string) (string, string, string, map[
 	if secretName, ok := volumeContext["secretName"]; ok {
 		// Load the secret that the PV spec defines
 		var e error
-		nms, _ := volumeContext["secretNamespace"]
+		nms, exist := volumeContext["secretNamespace"]
 		secret, e = getSecret(secretName, nms)
 		if e != nil {
 			// if the user explicitly requested a secret and there is an error fetching it, bail with an error
 			return "", "", "", nil, e
+		}
+		if exist {
+			delete(volumeContext, "secretNamespace")
 		}
 	} else {
 		// use rclone-secret as the default secret if none was defined
