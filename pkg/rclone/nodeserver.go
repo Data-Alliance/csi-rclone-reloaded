@@ -103,14 +103,15 @@ func extractFlags(volumeContext map[string]string) (string, string, string, map[
 	if secretName, ok := volumeContext["secretName"]; ok {
 		// Load the secret that the PV spec defines
 		var e error
-		secret, e = getSecret(secretName)
+		nms, _ := volumeContext["secretNamespace"]
+		secret, e = getSecret(secretName, nms)
 		if e != nil {
 			// if the user explicitly requested a secret and there is an error fetching it, bail with an error
 			return "", "", "", nil, e
 		}
 	} else {
 		// use rclone-secret as the default secret if none was defined
-		secret, _ = getSecret("rclone-secret")
+		secret, _ = getSecret("rclone-secret", "")
 	}
 
 	// Empty argument list
@@ -212,7 +213,7 @@ func validateFlags(flags map[string]string) error {
 	return nil
 }
 
-func getSecret(secretName string) (*v1.Secret, error) {
+func getSecret(secretName, nms string) (*v1.Secret, error) {
 	clientset, e := GetK8sClient()
 	if e != nil {
 		return nil, status.Errorf(codes.Internal, "can not create kubernetes client: %s", e)
@@ -223,9 +224,13 @@ func getSecret(secretName string) (*v1.Secret, error) {
 		&clientcmd.ConfigOverrides{},
 	)
 
-	namespace, _, err := kubeconfig.Namespace()
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "can't get current namespace, error %s", secretName, err)
+	var err error
+	namespace := nms
+	if namespace == "" {
+		namespace, _, err = kubeconfig.Namespace()
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "can't get current namespace, error %s", secretName, err)
+		}
 	}
 
 	klog.Infof("Loading csi-rclone connection defaults from secret %s/%s", namespace, secretName)
