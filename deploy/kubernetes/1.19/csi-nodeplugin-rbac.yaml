@@ -14,7 +14,7 @@ rules:
     resources: ["persistentvolumes"]
     verbs: ["get", "list", "watch", "update"]
   - apiGroups: [""]
-    resources: ["secrets", "secret"]
+    resources: ["secrets"]
     verbs: ["get", "list"]
   - apiGroups: [""]
     resources: ["nodes"]
